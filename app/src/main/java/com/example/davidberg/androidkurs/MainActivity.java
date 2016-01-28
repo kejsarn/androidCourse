@@ -5,12 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -22,6 +26,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,8 +66,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             @Override
             public void onReceive(Context context, Intent intent) {
                 boolean flight = intent.getBooleanExtra("state", false);
-                TextView tv = (TextView)findViewById(R.id.textView3);
-                tv.setText("Flight: "+flight);
+                TextView tv = (TextView) findViewById(R.id.textView3);
+                tv.setText("Flight: " + flight);
             }
         };
         this.registerReceiver(bcr, filter);
@@ -74,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     @Override
     public boolean onLongClick(View v) {
         // Do something in response to button click
-        TextView tv = (TextView)findViewById(R.id.textView);
+        TextView tv = (TextView) findViewById(R.id.textView);
         tv.setText("Long Clicked!");
         Context c = getApplicationContext();
         Toast t = Toast.makeText(c, "Long clicked!", Toast.LENGTH_SHORT);
@@ -123,26 +134,26 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         return super.onOptionsItemSelected(item);
     }
 
-    public void SwitchClicked(View v){
-        Switch sw = (Switch)v;
-        TextView tv = (TextView)findViewById(R.id.textView);
-        AnalogClock c = (AnalogClock)findViewById(R.id.analogClock);
+    public void SwitchClicked(View v) {
+        Switch sw = (Switch) v;
+        TextView tv = (TextView) findViewById(R.id.textView);
+        AnalogClock c = (AnalogClock) findViewById(R.id.analogClock);
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date d = new Date();
 
 
-        if(sw.isChecked()){
+        if (sw.isChecked()) {
             sw.setText("På!");
             tv.setText("Klockan var: " + df.format(d) + " senaste switch");
             c.setRotationX((float) 45.0);
-        }else{
+        } else {
             sw.setText("Av!");
             c.setRotationX((float) 0.0);
         }
     }
 
-    public void NyAktivitetKlickad(View v){
-        TextView tv = (TextView)findViewById(R.id.textView);
+    public void NyAktivitetKlickad(View v) {
+        TextView tv = (TextView) findViewById(R.id.textView);
 
         int reqCode = 12;
         Intent i = new Intent(this, Main2Activity.class);
@@ -150,21 +161,93 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         startActivityForResult(i, reqCode);
     }
 
-    protected void onActivityResult (int requestCode, int resultCode, Intent data){
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Bundle b = data.getExtras();
         String inst = b.getString("Inst");
-        TextView tv = (TextView)findViewById(R.id.textView);
+        TextView tv = (TextView) findViewById(R.id.textView);
         tv.setText("Inst: " + inst);
     }
-    public void ClockLongClicked(View v){
+
+    public void ClockLongClicked(View v) {
 
     }
 
-    public void sparaKnappKlickad(View v){
+    public void sparaKnappKlickad(View v) {
         set.Spara(this);
     }
 
-    public void laddaKnappKlickad(View v){
+    public void laddaKnappKlickad(View v) {
         set.Ladda(this);
+    }
+
+    public void onConnectClick(View v) {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new NikonConnectionTask().execute("http://www.vecka.nu/");
+        } else {
+            // Set text
+        }
+    }
+
+    private class NikonConnectionTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            try {
+                return downloadUrl(urls[0]);
+            } catch (IOException e) {
+                Context c = getApplicationContext();
+                Toast t = Toast.makeText(c, "Connection error!", Toast.LENGTH_SHORT);
+                t.show();
+                return "Unable to retrieve web page. URL may be invalid.";
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            TextView tv = (TextView) findViewById(R.id.textView4);
+            tv.setText(result);
+        }
+    }
+
+    private String downloadUrl(String myurl) throws IOException {
+        InputStream is = null;
+        // Only display the first 500 characters of the retrieved
+        // web page content.
+        int len = 500;
+
+        try {
+            URL url = new URL(myurl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000 /* milliseconds */);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            // Starts the query
+            conn.connect();
+            int response = conn.getResponseCode();
+            //Log.d(DEBUG_TAG, "The response is: " + response);
+            is = conn.getInputStream();
+
+            // Convert the InputStream into a string
+            String contentAsString = readIt(is, len);
+            return contentAsString;
+
+            // Makes sure that the InputStream is closed after the app is
+            // finished using it.
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+    // Reads an InputStream and converts it to a String.
+    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
+        Reader reader = null;
+        reader = new InputStreamReader(stream, "UTF-8");
+        char[] buffer = new char[len];
+        reader.read(buffer);
+        return new String(buffer);
     }
 }

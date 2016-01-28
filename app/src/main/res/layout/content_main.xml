@@ -23,19 +23,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/analogClock"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:clickable="true"
-        android:longClickable="true" />
+        android:longClickable="true"
+        android:layout_below="@+id/switch1"
+        android:layout_alignParentStart="true" />
 
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="En switch"
         android:id="@+id/switch1"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true"
-        android:onClick="SwitchClicked"/>
+        android:onClick="SwitchClicked"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/editText2" />
 
     <Button
         android:layout_width="wrap_content"
@@ -61,9 +61,9 @@
         android:layout_height="wrap_content"
         android:text="Spara"
         android:id="@+id/button4"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentStart="true"
-        android:onClick="sparaKnappKlickad" />
+        android:onClick="sparaKnappKlickad"
+        android:layout_above="@+id/button5"
+        android:layout_alignEnd="@+id/button5" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -71,16 +71,36 @@
         android:layout_height="wrap_content"
         android:text="Ladda"
         android:id="@+id/button5"
-        android:layout_below="@+id/button4"
+        android:onClick="laddaKnappKlickad"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:onClick="laddaKnappKlickad" />
+        android:layout_marginBottom="57dp" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText2"
-        android:layout_alignBottom="@+id/button5"
         android:layout_below="@+id/textView3"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:id="@+id/button6"
+        android:layout_alignTop="@+id/button"
+        android:layout_toEndOf="@+id/analogClock"
+        android:onClick="onConnectClick" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GP.se"
+        android:id="@+id/textView4"
+        android:layout_above="@+id/button4"
+        android:layout_toStartOf="@+id/editText2"
+        android:nestedScrollingEnabled="true"
+        android:scrollIndicators="right" />
 
 </RelativeLayout>
