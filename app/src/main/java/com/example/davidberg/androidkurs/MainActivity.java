@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -36,9 +37,23 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
+import com.philips.lighting.hue.listener.PHLightListener;
+import com.philips.lighting.hue.sdk.PHAccessPoint;
+import com.philips.lighting.hue.sdk.PHBridgeSearchManager;
+import com.philips.lighting.hue.sdk.PHHueSDK;
+import com.philips.lighting.hue.sdk.PHSDKListener;
+import com.philips.lighting.model.PHBridge;
+import com.philips.lighting.model.PHBridgeResource;
+import com.philips.lighting.model.PHHueError;
+import com.philips.lighting.model.PHHueParsingError;
+import com.philips.lighting.model.PHLight;
+import com.philips.lighting.model.PHLightState;
 
 public class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
 
+    private PHHueSDK phHueSDK;
     Settings set;
 
     @Override
@@ -72,8 +87,65 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         };
         this.registerReceiver(bcr, filter);
 
+        phHueSDK = PHHueSDK.getInstance();
+        Log.d("CREATION", "onCreate being executed!");
+
         set = new Settings();
     }
+
+    private void setUpHue(){
+        phHueSDK.setAppName("HueTram");
+        phHueSDK.setDeviceName(Build.MODEL);
+        phHueSDK.getNotificationManager().registerSDKListener(HueListener);
+        Log.d("CREATION", "setUpHue() executed !");
+    }
+
+    private PHSDKListener HueListener = new PHSDKListener() {
+
+
+        @Override
+        public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
+
+        }
+
+        @Override
+        public void onBridgeConnected(PHBridge phBridge, String s) {
+            phHueSDK.setSelectedBridge(phBridge);
+            phHueSDK.enableHeartbeat(phBridge, PHHueSDK.HB_INTERVAL);
+
+        }
+
+        @Override
+        public void onAuthenticationRequired(PHAccessPoint phAccessPoint) {
+
+            phHueSDK.startPushlinkAuthentication(phAccessPoint);
+        }
+
+        @Override
+        public void onAccessPointsFound(List<PHAccessPoint> list) {
+            Log.d("CREATION", "Access point found!");
+        }
+
+        @Override
+        public void onError(int i, String s) {
+
+        }
+
+        @Override
+        public void onConnectionResumed(PHBridge phBridge) {
+
+        }
+
+        @Override
+        public void onConnectionLost(PHAccessPoint phAccessPoint) {
+
+        }
+
+        @Override
+        public void onParsingErrors(List<PHHueParsingError> list) {
+
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,10 +158,14 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     public boolean onLongClick(View v) {
         // Do something in response to button click
         TextView tv = (TextView) findViewById(R.id.textView);
-        tv.setText("Long Clicked!");
+        tv.setText("Trying Hue!");
         Context c = getApplicationContext();
         Toast t = Toast.makeText(c, "Long clicked!", Toast.LENGTH_SHORT);
         t.show();
+        setUpHue();
+
+        PHBridgeSearchManager sm = (PHBridgeSearchManager) phHueSDK.getSDKService(PHHueSDK.SEARCH_BRIDGE);
+        sm.search(true, true);
         return true;
     }
 
