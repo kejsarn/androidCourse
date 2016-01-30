@@ -46,15 +46,18 @@ import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.hue.sdk.PHSDKListener;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHBridgeResource;
+import com.philips.lighting.model.PHBridgeResourcesCache;
 import com.philips.lighting.model.PHHueError;
 import com.philips.lighting.model.PHHueParsingError;
 import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 
+
 public class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
 
     private PHHueSDK phHueSDK;
     Settings set;
+    LjusLyssnare minLjusLyssnare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
-
+        minLjusLyssnare = new LjusLyssnare();
         set = new Settings();
     }
 
@@ -105,11 +108,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         @Override
         public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
-
+            Log.d("CREATION", "Cache Updated!");
         }
 
         @Override
         public void onBridgeConnected(PHBridge phBridge, String s) {
+            Log.d("CREATION", "Bridge connected!");
             phHueSDK.setSelectedBridge(phBridge);
             phHueSDK.enableHeartbeat(phBridge, PHHueSDK.HB_INTERVAL);
 
@@ -117,32 +121,39 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         @Override
         public void onAuthenticationRequired(PHAccessPoint phAccessPoint) {
-
+            Log.d("CREATION", "Auth required!");
             phHueSDK.startPushlinkAuthentication(phAccessPoint);
         }
 
         @Override
         public void onAccessPointsFound(List<PHAccessPoint> list) {
             Log.d("CREATION", "Access point found!");
+            if(list != null && list.size()==1){
+                phHueSDK.getAccessPointsFound().clear();
+                phHueSDK.getAccessPointsFound().addAll(list);
+
+                phHueSDK.connect(list.get(0));
+            }
         }
 
         @Override
         public void onError(int i, String s) {
-
+            Log.d("CREATION", "ErrrorNr: "+i+" text: "+s);
         }
 
         @Override
         public void onConnectionResumed(PHBridge phBridge) {
-
+            Log.d("CREATION", "Connection resumed!");
         }
 
         @Override
         public void onConnectionLost(PHAccessPoint phAccessPoint) {
-
+            Log.d("CREATION", "Connection!");
         }
 
         @Override
         public void onParsingErrors(List<PHHueParsingError> list) {
+            Log.d("CREATION", "Parsing error!");
 
         }
     };
@@ -266,10 +277,50 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             // Set text
         }
     }
+    public void hueButtonClicked(View v){
+        PHBridge bridge = PHHueSDK.getInstance().getSelectedBridge();
+        PHBridgeResourcesCache cache = bridge.getResourceCache();
 
-    private class NikonConnectionTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
+        List myLights = cache.getAllLights();
+
+        PHLightState lightState = new PHLightState();
+        lightState.setHue(12345);
+
+        bridge.updateLightState((PHLight)(myLights.get(0)), lightState, minLjusLyssnare);
+    }
+
+    private class LjusLyssnare implements PHLightListener {
+
+        public void onSuccess() {
+            Log.d("CREATION", "New hue sent successfully!");
+        }
+
+        public void onSearchComplete() {
+
+        }
+
+        public void onReceivingLights(java.util.List<PHBridgeResource> lights) {
+
+        }
+
+        public void onReceivingLightDetails(PHLight light) {
+
+        }
+
+        public void onStateUpdate(java.util.Map<java.lang.String, java.lang.String> successAttribute,
+                                  java.util.List<PHHueError> errorAttribute) {
+
+        }
+
+        public void onError(int code, java.lang.String message) {
+
+        }
+
+    }
+
+private class NikonConnectionTask extends AsyncTask<String, Void, String> {
+    @Override
+    protected String doInBackground(String... urls) {
             try {
                 return downloadUrl(urls[0]);
             } catch (IOException e) {
