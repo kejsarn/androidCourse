@@ -44,6 +44,7 @@ import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHBridgeSearchManager;
 import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.hue.sdk.PHSDKListener;
+import com.philips.lighting.hue.sdk.utilities.PHUtilities;
 import com.philips.lighting.model.PHBridge;
 import com.philips.lighting.model.PHBridgeResource;
 import com.philips.lighting.model.PHBridgeResourcesCache;
@@ -103,8 +104,20 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         Log.d("CREATION", "setUpHue() executed !");
     }
 
-    private PHSDKListener HueListener = new PHSDKListener() {
+    public PHSDKListener HueListener = new DavidsPHSDKListener(this);
 
+    private class DavidsPHSDKListener implements PHSDKListener {
+
+        public DavidsPHSDKListener(AppCompatActivity a){
+            this.a = a;
+        }
+
+
+        public void setA(AppCompatActivity a) {
+            this.a = a;
+        }
+
+        private AppCompatActivity a;
 
         @Override
         public void onCacheUpdated(List<Integer> list, PHBridge phBridge) {
@@ -113,10 +126,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         @Override
         public void onBridgeConnected(PHBridge phBridge, String s) {
+            String userName = "";
+            String ip = "";
             Log.d("CREATION", "Bridge connected!");
             phHueSDK.setSelectedBridge(phBridge);
             phHueSDK.enableHeartbeat(phBridge, PHHueSDK.HB_INTERVAL);
-
+            set.SaveUsernameAndIp(a, phHueSDK.getAccessPointsFound().get(0).getUsername(), phHueSDK.getAccessPointsFound().get(0).getIpAddress());
         }
 
         @Override
@@ -175,8 +190,25 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         t.show();
         setUpHue();
 
-        PHBridgeSearchManager sm = (PHBridgeSearchManager) phHueSDK.getSDKService(PHHueSDK.SEARCH_BRIDGE);
-        sm.search(true, true);
+
+        String[] returned = new String[2];
+        returned = set.LoadUsernameAndIp(this);
+        String userName = returned[0];
+        String ip = returned[1];
+        if(userName != "NULL" && ip!="NULL"){
+            Log.d("CREATION", "Saved UserName/Ip found!");
+            PHAccessPoint lastAccessPoint = new PHAccessPoint();
+            lastAccessPoint.setIpAddress(ip);
+            lastAccessPoint.setUsername(userName);
+            if(!phHueSDK.isAccessPointConnected(lastAccessPoint)){
+                Log.d("CREATION", "Trying to connect!");
+                phHueSDK.connect(lastAccessPoint);
+            }
+        }else {
+            Log.d("CREATION", "No saved UserName/Ip found!");
+            PHBridgeSearchManager sm = (PHBridgeSearchManager) phHueSDK.getSDKService(PHHueSDK.SEARCH_BRIDGE);
+            sm.search(true, true);
+        }
         return true;
     }
 
@@ -278,15 +310,18 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         }
     }
     public void hueButtonClicked(View v){
+
         PHBridge bridge = PHHueSDK.getInstance().getSelectedBridge();
         PHBridgeResourcesCache cache = bridge.getResourceCache();
 
-        List myLights = cache.getAllLights();
+        List<PHLight> myLights = cache.getAllLights();
 
+        float xy[] = PHUtilities.calculateXYFromRGB(0, 255, 0, myLights.get(0).getModelNumber());
         PHLightState lightState = new PHLightState();
-        lightState.setHue(12345);
+        lightState.setX(xy[0]);
+        lightState.setY(xy[1]);
 
-        bridge.updateLightState((PHLight)(myLights.get(0)), lightState, minLjusLyssnare);
+        bridge.updateLightState((PHLight) (myLights.get(0)), lightState, minLjusLyssnare);
     }
 
     private class LjusLyssnare implements PHLightListener {
