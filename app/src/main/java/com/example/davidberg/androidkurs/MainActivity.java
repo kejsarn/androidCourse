@@ -37,7 +37,10 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import com.philips.lighting.hue.listener.PHLightListener;
 import com.philips.lighting.hue.sdk.PHAccessPoint;
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
         minLjusLyssnare = new LjusLyssnare();
+
         set = new Settings();
     }
 
@@ -132,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             phHueSDK.setSelectedBridge(phBridge);
             phHueSDK.enableHeartbeat(phBridge, PHHueSDK.HB_INTERVAL);
             set.SaveUsernameAndIp(a, phHueSDK.getAccessPointsFound().get(0).getUsername(), phHueSDK.getAccessPointsFound().get(0).getIpAddress());
+            invalidateOptionsMenu();
         }
 
         @Override
@@ -179,6 +184,21 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         inflater.inflate(R.menu.davidsmeny, menu);
         return true;
     }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu){
+        Log.d("CREATION", "onPrepareOptionsMenu!");
+        if(phHueSDK != null && phHueSDK.getSelectedBridge() != null) {
+            PHBridge b = phHueSDK.getSelectedBridge();
+            List<PHLight> lights = b.getResourceCache().getAllLights();
+            ListIterator<PHLight> it = lights.listIterator();
+            while (it.hasNext()) {
+                menu.add(it.next().getName());
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public boolean onLongClick(View v) {
@@ -315,19 +335,50 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         PHBridgeResourcesCache cache = bridge.getResourceCache();
 
         List<PHLight> myLights = cache.getAllLights();
+        Log.d("CREATION", myLights.toString());
 
         float xy[] = PHUtilities.calculateXYFromRGB(0, 255, 0, myLights.get(0).getModelNumber());
         PHLightState lightState = new PHLightState();
         lightState.setX(xy[0]);
         lightState.setY(xy[1]);
 
-        bridge.updateLightState((PHLight) (myLights.get(0)), lightState, minLjusLyssnare);
+        bridge.updateLightState((PHLight) (myLights.get(0)), lightState, new PHLightListener() {
+            @Override
+            public void onReceivingLightDetails(PHLight phLight) {
+
+            }
+
+            @Override
+            public void onReceivingLights(List<PHBridgeResource> list) {
+
+            }
+
+            @Override
+            public void onSearchComplete() {
+
+            }
+
+            @Override
+            public void onSuccess() {
+                Log.d("CREATION", "New hue sent successfully!");
+            }
+
+            @Override
+            public void onError(int i, String s) {
+
+            }
+
+            @Override
+            public void onStateUpdate(Map<String, String> map, List<PHHueError> list) {
+
+            }
+        });
     }
 
     private class LjusLyssnare implements PHLightListener {
 
         public void onSuccess() {
-            Log.d("CREATION", "New hue sent successfully!");
+
         }
 
         public void onSearchComplete() {
