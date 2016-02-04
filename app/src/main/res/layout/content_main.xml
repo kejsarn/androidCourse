@@ -12,96 +12,35 @@
     tools:context="com.example.davidberg.androidkurs.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#FF0000"
-        android:text="Hejsan världen!"
-        android:id="@+id/textView" />
-
-    <AnalogClock
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/analogClock"
-        android:clickable="true"
-        android:longClickable="true"
-        android:layout_below="@+id/switch1"
-        android:layout_alignParentStart="true" />
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="En switch"
-        android:id="@+id/switch1"
-        android:onClick="SwitchClicked"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/editText2" />
-
     <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ny Aktivitet"
-        android:id="@+id/button"
-        android:layout_below="@+id/switch1"
-        android:layout_alignEnd="@+id/switch1"
-        android:layout_marginTop="39dp"
-        android:onClick="NyAktivitetKlickad" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Broadcast Received:"
-        android:id="@+id/textView3"
-        android:layout_below="@+id/analogClock"
+        android:text="Spara"
+        android:id="@+id/saveButton"
+        android:onClick="sparaKnappKlickad"
+        android:layout_below="@+id/hueButton"
         android:layout_centerHorizontal="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Spara"
-        android:id="@+id/button4"
-        android:onClick="sparaKnappKlickad"
-        android:layout_above="@+id/button5"
-        android:layout_alignEnd="@+id/button5" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Ladda"
-        android:id="@+id/button5"
+        android:id="@+id/loadButton"
         android:onClick="laddaKnappKlickad"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="57dp" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText2"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/saveButton"
+        android:layout_centerHorizontal="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect"
-        android:id="@+id/button6"
-        android:layout_alignTop="@+id/button"
-        android:layout_toEndOf="@+id/analogClock"
-        android:onClick="onConnectClick" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GP.se"
-        android:id="@+id/textView4"
-        android:layout_above="@+id/button4"
-        android:layout_toStartOf="@+id/editText2"
-        android:nestedScrollingEnabled="true"
-        android:scrollIndicators="right" />
+        android:text="Resa"
+        android:id="@+id/connectTramButton"
+        android:onClick="onConnectClick"
+        android:layout_below="@+id/bridgeButton"
+        android:layout_centerHorizontal="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -109,9 +48,18 @@
         android:layout_height="wrap_content"
         android:text="Hue"
         android:id="@+id/hueButton"
-        android:layout_above="@+id/textView4"
-        android:layout_alignEnd="@+id/textView"
-        android:layout_marginBottom="37dp"
-        android:onClick="hueButtonClicked" />
+        android:onClick="hueButtonClicked"
+        android:layout_below="@+id/connectTramButton"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect Bridge"
+        android:id="@+id/bridgeButton"
+        android:onClick="onLongClick"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

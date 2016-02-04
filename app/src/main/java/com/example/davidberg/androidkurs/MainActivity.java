@@ -61,42 +61,14 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
     private PHHueSDK phHueSDK;
     Settings set;
-    LjusLyssnare minLjusLyssnare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        AnalogClock a = (AnalogClock) findViewById(R.id.analogClock);
-        a.setOnLongClickListener(this);
-
-        IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-
-        BroadcastReceiver bcr = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                boolean flight = intent.getBooleanExtra("state", false);
-                TextView tv = (TextView) findViewById(R.id.textView3);
-                tv.setText("Flight: " + flight);
-            }
-        };
-        this.registerReceiver(bcr, filter);
 
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
-        minLjusLyssnare = new LjusLyssnare();
 
         set = new Settings();
     }
@@ -203,10 +175,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     @Override
     public boolean onLongClick(View v) {
         // Do something in response to button click
-        TextView tv = (TextView) findViewById(R.id.textView);
-        tv.setText("Trying Hue!");
         Context c = getApplicationContext();
-        Toast t = Toast.makeText(c, "Long clicked!", Toast.LENGTH_SHORT);
+        Toast t = Toast.makeText(c, "Connecting bridge!", Toast.LENGTH_SHORT);
         t.show();
         setUpHue();
 
@@ -258,13 +228,11 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             return true;
         }
         if (id == R.id.Spara) {
-            set.Spara(this);
             Toast t = Toast.makeText(c, "Spara", Toast.LENGTH_SHORT);
             t.show();
             return true;
         }
         if (id == R.id.Ladda) {
-            set.Ladda(this);
             Toast t = Toast.makeText(c, "Ladda", Toast.LENGTH_SHORT);
             t.show();
             return true;
@@ -273,62 +241,15 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         return super.onOptionsItemSelected(item);
     }
 
-    public void SwitchClicked(View v) {
-        Switch sw = (Switch) v;
-        TextView tv = (TextView) findViewById(R.id.textView);
-        AnalogClock c = (AnalogClock) findViewById(R.id.analogClock);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date d = new Date();
-
-
-        if (sw.isChecked()) {
-            sw.setText("På!");
-            tv.setText("Klockan var: " + df.format(d) + " senaste switch");
-            c.setRotationX((float) 45.0);
-        } else {
-            sw.setText("Av!");
-            c.setRotationX((float) 0.0);
-        }
-    }
-
-    public void NyAktivitetKlickad(View v) {
-        TextView tv = (TextView) findViewById(R.id.textView);
-
-        int reqCode = 12;
-        Intent i = new Intent(this, Main2Activity.class);
-        i.putExtra("text", tv.getText());
-        startActivityForResult(i, reqCode);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Bundle b = data.getExtras();
-        String inst = b.getString("Inst");
-        TextView tv = (TextView) findViewById(R.id.textView);
-        tv.setText("Inst: " + inst);
-    }
-
-    public void ClockLongClicked(View v) {
-
-    }
 
     public void sparaKnappKlickad(View v) {
-        set.Spara(this);
+
     }
 
     public void laddaKnappKlickad(View v) {
-        set.Ladda(this);
+
     }
 
-    public void onConnectClick(View v) {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-
-        if (networkInfo != null && networkInfo.isConnected()) {
-            new NikonConnectionTask().execute("http://www.vecka.nu/");
-        } else {
-            // Set text
-        }
-    }
     public void hueButtonClicked(View v){
 
         PHBridge bridge = PHHueSDK.getInstance().getSelectedBridge();
@@ -350,12 +271,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
             @Override
             public void onReceivingLights(List<PHBridgeResource> list) {
-
+                Log.d("CREATION", "onReceivingLights()");
             }
 
             @Override
             public void onSearchComplete() {
-
+                Log.d("CREATION", "onSearchComplete()");
             }
 
             @Override
@@ -365,102 +286,15 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
             @Override
             public void onError(int i, String s) {
-
+                Log.d("CREATION", "onError()");
             }
 
             @Override
             public void onStateUpdate(Map<String, String> map, List<PHHueError> list) {
-
+                Log.d("CREATION", "onStateUpdate()");
             }
         });
     }
 
-    private class LjusLyssnare implements PHLightListener {
 
-        public void onSuccess() {
-
-        }
-
-        public void onSearchComplete() {
-
-        }
-
-        public void onReceivingLights(java.util.List<PHBridgeResource> lights) {
-
-        }
-
-        public void onReceivingLightDetails(PHLight light) {
-
-        }
-
-        public void onStateUpdate(java.util.Map<java.lang.String, java.lang.String> successAttribute,
-                                  java.util.List<PHHueError> errorAttribute) {
-
-        }
-
-        public void onError(int code, java.lang.String message) {
-
-        }
-
-    }
-
-private class NikonConnectionTask extends AsyncTask<String, Void, String> {
-    @Override
-    protected String doInBackground(String... urls) {
-            try {
-                return downloadUrl(urls[0]);
-            } catch (IOException e) {
-                Context c = getApplicationContext();
-                Toast t = Toast.makeText(c, "Connection error!", Toast.LENGTH_SHORT);
-                t.show();
-                return "Unable to retrieve web page. URL may be invalid.";
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            TextView tv = (TextView) findViewById(R.id.textView4);
-            tv.setText(result);
-        }
-    }
-
-    private String downloadUrl(String myurl) throws IOException {
-        InputStream is = null;
-        // Only display the first 500 characters of the retrieved
-        // web page content.
-        int len = 500;
-
-        try {
-            URL url = new URL(myurl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            // Starts the query
-            conn.connect();
-            int response = conn.getResponseCode();
-            //Log.d(DEBUG_TAG, "The response is: " + response);
-            is = conn.getInputStream();
-
-            // Convert the InputStream into a string
-            String contentAsString = readIt(is, len);
-            return contentAsString;
-
-            // Makes sure that the InputStream is closed after the app is
-            // finished using it.
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-        }
-    }
-    // Reads an InputStream and converts it to a String.
-    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] buffer = new char[len];
-        reader.read(buffer);
-        return new String(buffer);
-    }
 }

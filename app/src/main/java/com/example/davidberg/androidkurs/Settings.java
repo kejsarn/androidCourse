@@ -16,22 +16,6 @@ import java.util.Set;
  */
 public class Settings {
 
-    static public void Spara(AppCompatActivity a){
-        TextView tv = (TextView)a.findViewById(R.id.editText2);
-        SharedPreferences pref = a.getSharedPreferences("PREF_NAME", 0);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("SparadText", tv.getText().toString());
-        editor.commit();
-    }
-
-    static public void Ladda(AppCompatActivity a){
-        String labelText = "NOLL";
-        TextView tv = (TextView)a.findViewById(R.id.editText2);
-        SharedPreferences pref = a.getSharedPreferences("PREF_NAME", 0);
-
-        tv.setText(pref.getString("SparadText", labelText));
-    }
-
     static public void SaveUsernameAndIp(AppCompatActivity a, String userName, String ip){
         Log.d("CREATION", "Saving userName: "+userName+" and ip: "+ip);
         SharedPreferences pref = a.getSharedPreferences("PREF_HUE", 0);
