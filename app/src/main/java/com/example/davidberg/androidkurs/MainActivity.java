@@ -66,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
@@ -296,5 +298,15 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         });
     }
 
+    public boolean onConnectClick(View v) {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new Vasttrafik().execute();
+                    } else {
+                        // Set text
+            }
+        return true;
+    }
 }
