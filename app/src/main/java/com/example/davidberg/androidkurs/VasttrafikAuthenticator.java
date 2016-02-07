@@ -3,35 +3,50 @@ package com.example.davidberg.androidkurs;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Base64;
+import android.util.JsonReader;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by davidberg on 05/02/16.
  */
-public class Vasttrafik extends AsyncTask<Void,Integer,Boolean> {
+public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAuthInfo> {
     private static final String URL_AUTHENTICATION_TOKEN = "https://api.vasttrafik.se/token";
 
+    private VasttrafikAuthInfo retObj = new VasttrafikAuthInfo();
+
+
     @Override
-    protected Boolean doInBackground(Void... v){
+    protected VasttrafikAuthInfo doInBackground(Void... v){
         return getAuth();
     }
 
     @Override
-    protected void onPostExecute(Boolean bool) {
+    protected void onPostExecute(VasttrafikAuthInfo vAuth) {
+
     }
 
-    private Boolean getAuth(){
+    private VasttrafikAuthInfo getAuth(){
         URL url;
         try {
             url = new URL(URL_AUTHENTICATION_TOKEN);
@@ -54,24 +69,44 @@ public class Vasttrafik extends AsyncTask<Void,Integer,Boolean> {
             out.close();
 
             int responseCode =conn.getResponseCode();
+
+            GZIPInputStream gzin = new GZIPInputStream(conn.getInputStream());
+            JsonReader reader = new JsonReader(new InputStreamReader(gzin, "UTF-8"));
+            reader.setLenient(true);
+
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 Log.d("VASTTRAFIK", "Response HTTP_OK: "+responseCode);
-                String line;
-                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                while ((line=br.readLine()) != null) {
-                    Log.d("VASTTRAFIK", "Line: "+line);
-                }
-            }
-            else {
-                Log.e("VASTTRAFIK", "Response NOT_OK: "+responseCode);
-            }
 
-            return true;
+                try {
+                    reader.beginObject();
+                    while(reader.hasNext()){
+                        Log.d("VASTTRAFIK", "Reader hasNext() ");
+                        String nextName = reader.nextName();
+                        Log.d("VASTTRAFIK", "Reader nextName:"+nextName);
+                        if(nextName.equals("access_token")){
+                            retObj.setAccessToken(reader.nextString());
+                        }else if(nextName.equals("expires_in")){
+                             retObj.setExpirationTime(reader.nextInt());
+                        }else{
+                            reader.skipValue();
+                        }
+                    }
+                    reader.endObject();
+                    reader.close();
+                    Log.d("VASTTRAFIK", "Access Token: "+retObj.getAccessToken());
+                    Log.d("VASTTRAFIK", "Exporation Time: "+retObj.getExpirationTime());
+                } catch (Exception e){
+                    Log.e("VASTTRAFIK", "JSON exception: ");
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("VASTTRAFIK", "Response NOT_OK: " + responseCode);
+            }
+            return retObj;
         }catch(Exception e){
             Log.e("VASTTRAFIK", "Can't connect!");
             e.printStackTrace();
-            return false;
+            return retObj;
         }
     }
-
 }

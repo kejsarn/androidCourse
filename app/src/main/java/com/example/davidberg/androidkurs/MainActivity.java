@@ -1,43 +1,20 @@
 package com.example.davidberg.androidkurs;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AnalogClock;
-import android.widget.Button;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -303,7 +280,17 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
-            new Vasttrafik().execute();
+            new VasttrafikAuthenticator() {
+                @Override
+                protected void onPostExecute(VasttrafikAuthInfo vAuth) {
+                    Log.d("CREATION", "vAuth.getAccessToken(): "+vAuth.getAccessToken());
+                    Log.d("CREATION", "vAuth.getExpirationTime(): " + vAuth.getExpirationTime());
+                    TextView txt = (TextView) findViewById(R.id.textViewToken);
+                    txt.setText(vAuth.getAccessToken());
+                    TextView txtExp = (TextView) findViewById(R.id.textViewExpires);
+                    txtExp.setText(vAuth.getExpirationTime().toString());
+                }
+            }.execute();
                     } else {
                         // Set text
             }
