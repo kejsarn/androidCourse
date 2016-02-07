@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     private PHHueSDK phHueSDK;
     private VasttrafikAuthenticatorInfo vAuth;
     private List<VasttrafikJourney> journeys;
+    private JourneyAdapter jAdapter;
     Settings set;
 
     @Override
@@ -50,13 +52,11 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        /*ListView lv = (ListView) findViewById(R.id.listView);
-        ArrayAdapter<VasttrafikJourney> arrayAdapter = new ArrayAdapter<VasttrafikJourney>(
-                this,
-                R.id.listView,
-                journeys );
+        journeys = new ArrayList<VasttrafikJourney>();
+        ListView lv = (ListView) findViewById(R.id.listView);
+        jAdapter = new JourneyAdapter(lv.getContext(), journeys);
 
-        lv.setAdapter(arrayAdapter);*/
+        lv.setAdapter(jAdapter);
 
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
@@ -340,7 +340,11 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     }
 
     private void updateJourneyList(List<VasttrafikJourney> journeys){
-        this.journeys = journeys;
+        this.journeys.clear();
+        this.journeys.addAll(journeys);
+        if( jAdapter != null){
+            jAdapter.notifyDataSetChanged();
+        }
     }
 
     //public VasttrafikAuthenticatorInfo getAuth(){
