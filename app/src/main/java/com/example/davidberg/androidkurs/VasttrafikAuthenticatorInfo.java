@@ -2,10 +2,13 @@ package com.example.davidberg.androidkurs;
 
 /**
  * Created by davidberg on 07/02/16.
+ *
+ * Contains important info returned from Vasttrafiks OAuth server.
+ *
  */
-public class VasttrafikAuthInfo{
-    private String accessToken;
-    private Integer expirationTime;
+public class VasttrafikAuthenticatorInfo {
+    private String accessToken = "No token";
+    private Integer expirationTime = 0;
 
     public String getAccessToken() {
         return accessToken;
@@ -21,6 +24,10 @@ public class VasttrafikAuthInfo{
 
     public void setExpirationTime(int expirationTime) {
         this.expirationTime = expirationTime;
+    }
+
+    public boolean isSet() {
+        return (!accessToken.equals("No token") && expirationTime!=0);
     }
 
 }

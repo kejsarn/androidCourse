@@ -12,6 +12,8 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,9 +36,11 @@ import com.philips.lighting.model.PHLight;
 import com.philips.lighting.model.PHLightState;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnLongClickListener, VasttrafikAuthenticatorCaller {
 
     private PHHueSDK phHueSDK;
+    private VasttrafikAuthenticatorInfo vAuth;
+    private List<VasttrafikJourney> journeys;
     Settings set;
 
     @Override
@@ -46,9 +50,17 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
+        /*ListView lv = (ListView) findViewById(R.id.listView);
+        ArrayAdapter<VasttrafikJourney> arrayAdapter = new ArrayAdapter<VasttrafikJourney>(
+                this,
+                R.id.listView,
+                journeys );
+
+        lv.setAdapter(arrayAdapter);*/
+
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
-
+        vAuth = new VasttrafikAuthenticatorInfo();
         set = new Settings();
     }
 
@@ -280,20 +292,62 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) {
-            new VasttrafikAuthenticator() {
+            new VasttrafikAuthenticator(this) {
                 @Override
-                protected void onPostExecute(VasttrafikAuthInfo vAuth) {
+                protected void onPostExecute(VasttrafikAuthenticatorInfo vAuth) {
                     Log.d("CREATION", "vAuth.getAccessToken(): "+vAuth.getAccessToken());
                     Log.d("CREATION", "vAuth.getExpirationTime(): " + vAuth.getExpirationTime());
                     TextView txt = (TextView) findViewById(R.id.textViewToken);
                     txt.setText(vAuth.getAccessToken());
                     TextView txtExp = (TextView) findViewById(R.id.textViewExpires);
                     txtExp.setText(vAuth.getExpirationTime().toString());
+                    super.onPostExecute(vAuth);
                 }
             }.execute();
-                    } else {
+        } else {
                         // Set text
-            }
+        }
         return true;
     }
+
+    public boolean getDepClicked(View v){
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+            if(vAuth.isSet()) {
+                Log.d("VASTTRAFIK", "getDepClicked() vAuth set: "+vAuth.getAccessToken());
+                new VasttrafikDepartureBoard() {
+                    @Override
+                    protected void onPostExecute(List<VasttrafikJourney> journeys) {
+                        updateJourneyList(journeys);
+                    }
+                }.execute("9021014003980000", vAuth.getAccessToken());
+            }else{
+                Log.d("VASTTRAFIK", "getDepClicked() vAuth not set: "+vAuth.getAccessToken());
+            }
+        }
+    // norra ullevi: 9021014007171000
+        //korsv: 9021014003980000
+
+        return true;
+    }
+
+    public void onAuthReceived(VasttrafikAuthenticatorInfo vAuth){
+        Log.d("VASTTRAFIK", "onAuthReceived() token: "+vAuth.getAccessToken());
+        Log.d("VASTTRAFIK", "onAuthReceived() expire: "+vAuth.getExpirationTime());
+        this.vAuth = vAuth;
+    }
+
+    private void updateJourneyList(List<VasttrafikJourney> journeys){
+        this.journeys = journeys;
+    }
+
+    //public VasttrafikAuthenticatorInfo getAuth(){
+    //    return vAuth;
+    //}
+
+    //public void setAuth(VasttrafikAuthenticatorInfo auth){
+    //    vAuth = auth;
+    //}
 }

@@ -6,47 +6,46 @@ import android.util.Base64;
 import android.util.JsonReader;
 import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by davidberg on 05/02/16.
+ *
+ * Used to interface Vasttrafiks OAuth.
+ *
  */
-public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAuthInfo> {
+public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAuthenticatorInfo> {
+    // These are from https://developer.vasttrafik.se/portal/#/overview
     private static final String URL_AUTHENTICATION_TOKEN = "https://api.vasttrafik.se/token";
+    private static final String CLIENT_IDENTIFIER = "iTzjSsDAPEd0Iu2qyVEm2ikm2XMa";
+    private static final String CLIENT_SECRET = "esAejfT3iHX9IkcAzbbmXN3Js70a";
 
-    private VasttrafikAuthInfo retObj = new VasttrafikAuthInfo();
+    private VasttrafikAuthenticatorInfo retObj = new VasttrafikAuthenticatorInfo();
+    VasttrafikAuthenticatorCaller vc;
 
+    VasttrafikAuthenticator(VasttrafikAuthenticatorCaller vc) {
+        this.vc = vc;
+    }
 
     @Override
-    protected VasttrafikAuthInfo doInBackground(Void... v){
+    protected VasttrafikAuthenticatorInfo doInBackground(Void... v){
         return getAuth();
     }
 
     @Override
-    protected void onPostExecute(VasttrafikAuthInfo vAuth) {
-
+    protected void onPostExecute(VasttrafikAuthenticatorInfo vAuth) {
+        vc.onAuthReceived(vAuth);
     }
 
-    private VasttrafikAuthInfo getAuth(){
+    private VasttrafikAuthenticatorInfo getAuth(){
         URL url;
         try {
             url = new URL(URL_AUTHENTICATION_TOKEN);
@@ -58,8 +57,7 @@ public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAu
             conn.setRequestProperty("Host", "auth.vasttrafik.se");
             conn.setRequestProperty("Connection", "Keep-Alive");
 
-            // These are from https://developer.vasttrafik.se/portal/#/overview
-            conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString("iTzjSsDAPEd0Iu2qyVEm2ikm2XMa:esAejfT3iHX9IkcAzbbmXN3Js70a".getBytes(), Base64.DEFAULT));
+            conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((CLIENT_IDENTIFIER + ":" + CLIENT_SECRET).getBytes(), Base64.DEFAULT));
 
             OutputStream out = new BufferedOutputStream(conn.getOutputStream());
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
@@ -75,7 +73,7 @@ public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAu
             reader.setLenient(true);
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                Log.d("VASTTRAFIK", "Response HTTP_OK: "+responseCode);
+                Log.d("VASTTRAFIK", "Auth Response HTTP_OK: "+responseCode);
 
                 try {
                     reader.beginObject();
@@ -83,10 +81,12 @@ public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAu
                         Log.d("VASTTRAFIK", "Reader hasNext() ");
                         String nextName = reader.nextName();
                         Log.d("VASTTRAFIK", "Reader nextName:"+nextName);
+
+                        // We're only interested in two of the fields; access_token and expires_in
                         if(nextName.equals("access_token")){
                             retObj.setAccessToken(reader.nextString());
                         }else if(nextName.equals("expires_in")){
-                             retObj.setExpirationTime(reader.nextInt());
+                            retObj.setExpirationTime(reader.nextInt());
                         }else{
                             reader.skipValue();
                         }
@@ -100,7 +100,7 @@ public class VasttrafikAuthenticator extends AsyncTask<Void,Integer,VasttrafikAu
                     e.printStackTrace();
                 }
             } else {
-                Log.e("VASTTRAFIK", "Response NOT_OK: " + responseCode);
+                Log.e("VASTTRAFIK", "Auth Response NOT_OK: " + responseCode);
             }
             return retObj;
         }catch(Exception e){
