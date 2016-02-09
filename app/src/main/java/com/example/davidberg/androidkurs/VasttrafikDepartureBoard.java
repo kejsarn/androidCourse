@@ -22,7 +22,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Created by davidberg on 07/02/16.
  */
-public class VasttrafikDepartureBoard extends AsyncTask<String,Integer,List<VasttrafikJourney>> {
+public class VasttrafikDepartureBoard extends AsyncTask<String,VasttrafikJourney,List<VasttrafikJourney>> {
 
     private static final String URL_DEPARTURE_BOARD = "https://api.vasttrafik.se/bin/rest.exe/v2/departureBoard";
 
@@ -43,6 +43,7 @@ public class VasttrafikDepartureBoard extends AsyncTask<String,Integer,List<Vast
     protected void onPostExecute(List<VasttrafikJourney> journeys){
 
     }
+
 
     private List<VasttrafikJourney> getJourneys(String stopId, String token){
         List<VasttrafikJourney> retList = new ArrayList<VasttrafikJourney>();
@@ -87,9 +88,11 @@ public class VasttrafikDepartureBoard extends AsyncTask<String,Integer,List<Vast
                         v.setSname(departure.getString("sname"));
                         v.setDirection(departure.getString("direction"));
                         v.setTime(departure.getString("rtTime"));
+                        v.setDate(departure.getString("rtDate"));
                         v.setJourneyId(departure.getString("journeyid"));
                         retList.add(v);
-                        Log.d("VASTTRAFIK","Departure; Name: "+v.getName()+", Direction: "+v.getDirection()+", Time: "+v.getTime());
+                        publishProgress(v);
+                        //Log.d("VASTTRAFIK","Departure; Name: "+v.getName()+", Direction: "+v.getDirection()+", DateTime: "+v.getDate()+" "+v.getTime()+" Minutes til departure: "+v.minutesUntilDeparture().toString());
                     } catch (JSONException e) {
                         Log.e("VASTTRAFIK", "Departure parsing error");
                         e.printStackTrace();

@@ -62,10 +62,14 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
     }
 
     @Override
+    public long getItemId(int position){
+        return Long.parseLong(mJourneys.get(position).getJourneyId());
+    }
+
+    @Override
     public int getItemCount() {
         return mJourneys.size();
     }
-
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         public TextView time;

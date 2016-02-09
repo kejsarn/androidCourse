@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         //jAdapter = new JourneyAdapter(lv.getContext(), journeys);
         mAdapter = new JourneyAdapter(journeys);
-
+        mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
 
         phHueSDK = PHHueSDK.getInstance();
@@ -332,8 +333,41 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                 new VasttrafikDepartureBoard() {
                     @Override
                     protected void onPostExecute(List<VasttrafikJourney> journeys) {
-                        updateJourneyList(journeys);
+                        //TODO Could remove the parameter since we don't use it
+                        updateJourneyList();
                     }
+
+                    @Override
+                    protected void onProgressUpdate(VasttrafikJourney... journey) {
+                        Log.d("VASTTRAFIK", "onProgressUpdate()");
+                        if(journey.length>1){
+                            Log.e("VASTTRAFIK", "onProgressUpdate input argument length error");
+                            return;
+                        }
+                        ListIterator<VasttrafikJourney> it = journeys.listIterator();
+                        VasttrafikJourney inputJourney = journey[0];
+                        VasttrafikJourney JourneyInList;
+                        while(it.hasNext()){
+                            JourneyInList = it.next();
+                            if(JourneyInList.getJourneyId().equals(inputJourney.getJourneyId())){
+                                JourneyInList.setDirection(inputJourney.getDirection());
+                                JourneyInList.setSname(inputJourney.getSname());
+                                JourneyInList.setTime(inputJourney.getTime());
+                                JourneyInList.setName(inputJourney.getName());
+                                mAdapter.notifyItemChanged(journeys.indexOf(JourneyInList));
+                                Log.d("VASTTRAFIK", "Journey with id: "+inputJourney.getJourneyId()+" already in List, updated item");
+                                break;
+                            }
+                        }
+                        if(journeys.contains(inputJourney)==false){
+                            journeys.add(inputJourney);
+                            mAdapter.notifyItemInserted(journeys.size());
+                            Log.d("VASTTRAFIK", "Journey with id: " + inputJourney.getJourneyId() + " not in List, added item");
+                        }
+                        Log.d("VASTTRAFIK","Departure; Name: "+inputJourney.getName()+", Direction: "+inputJourney.getDirection()+", DateTime: "+inputJourney.getDate()+" "+inputJourney.getTime()+" Minutes til departure: "+inputJourney.minutesUntilDeparture().toString());
+
+                    }
+
                 }.execute("9021014003980000", vAuth.getAccessToken());
             }else{
                 Log.d("VASTTRAFIK", "getDepClicked() vAuth not set: "+vAuth.getAccessToken());
@@ -347,17 +381,27 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
     public void onAuthReceived(VasttrafikAuthenticatorInfo vAuth){
         Log.d("VASTTRAFIK", "onAuthReceived() token: "+vAuth.getAccessToken());
-        Log.d("VASTTRAFIK", "onAuthReceived() expire: "+vAuth.getExpirationTime());
+        Log.d("VASTTRAFIK", "onAuthReceived() expire: " + vAuth.getExpirationTime());
         this.vAuth = vAuth;
     }
 
-    private void updateJourneyList(List<VasttrafikJourney> journeys){
-        this.journeys.clear();
-        this.journeys.addAll(journeys);
-        if( mAdapter != null){
-            mAdapter.notifyDataSetChanged();
+    private void updateJourneyList(){
+        ListIterator<VasttrafikJourney> it = journeys.listIterator();
+        VasttrafikJourney journeyInList;
+        while(it.hasNext()) {
+            journeyInList = it.next();
+            if(journeyInList.minutesUntilDeparture()<0){
+                Log.d("VASTTRAFIK", "Journey with id: "+journeyInList.getJourneyId()+" removed since minutesUntilDep<0");
+                //TODO Fix bug somewhere around here
+                int i = journeys.indexOf(journeyInList);
+                journeys.remove(i);
+                mAdapter.notifyItemRemoved(i);
+            }
         }
+
     }
+
+
 
     //public VasttrafikAuthenticatorInfo getAuth(){
     //    return vAuth;
