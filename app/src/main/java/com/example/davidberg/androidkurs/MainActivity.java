@@ -6,6 +6,8 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuInflater;
@@ -42,8 +44,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     private PHHueSDK phHueSDK;
     private VasttrafikAuthenticatorInfo vAuth;
     private List<VasttrafikJourney> journeys;
-    private JourneyAdapter jAdapter;
+    //private JourneyAdapter jAdapter;
     Settings set;
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +59,16 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         setSupportActionBar(myToolbar);
 
         journeys = new ArrayList<VasttrafikJourney>();
-        ListView lv = (ListView) findViewById(R.id.listView);
-        jAdapter = new JourneyAdapter(lv.getContext(), journeys);
+        //ListView lv = (ListView) findViewById(R.id.listView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.myRecyclerView);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
-        lv.setAdapter(jAdapter);
+        //jAdapter = new JourneyAdapter(lv.getContext(), journeys);
+        mAdapter = new JourneyAdapter(journeys);
+
+        mRecyclerView.setAdapter(mAdapter);
 
         phHueSDK = PHHueSDK.getInstance();
         Log.d("CREATION", "onCreate being executed!");
@@ -342,8 +354,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     private void updateJourneyList(List<VasttrafikJourney> journeys){
         this.journeys.clear();
         this.journeys.addAll(journeys);
-        if( jAdapter != null){
-            jAdapter.notifyDataSetChanged();
+        if( mAdapter != null){
+            mAdapter.notifyDataSetChanged();
         }
     }
 
