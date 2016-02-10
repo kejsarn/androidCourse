@@ -1,49 +1,69 @@
 package com.example.davidberg.androidkurs;
 
 import android.content.Context;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.util.SortedListAdapterCallback;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Vector;
 
 /**
  * Created by davidberg on 07/02/16.
  */
 public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHolder> {
     protected Context mContext;
-    protected List<VasttrafikJourney> mJourneys;
+    protected SortedList<VasttrafikJourney> mJourneys;
 
-    public JourneyAdapter(List<VasttrafikJourney> journeys) {
-        mJourneys = journeys;
+    public JourneyAdapter() {
+        mJourneys = new SortedList<VasttrafikJourney>(VasttrafikJourney.class, new SortedListAdapterCallback<VasttrafikJourney>(this) {
+            @Override
+            public int compare(VasttrafikJourney j0, VasttrafikJourney j1) {
+                return (int)(j0.minutesUntilDeparture() - j1.minutesUntilDeparture());
+            }
+
+            @Override
+            public boolean areItemsTheSame(VasttrafikJourney j0, VasttrafikJourney j1){
+                return j0.getJourneyId().equals(j1.getJourneyId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(VasttrafikJourney oldItem, VasttrafikJourney newItem){
+                return oldItem.equals(newItem);
+            }
+        });
     }
 
-    /*@Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+    public void addItem(VasttrafikJourney j){
+        mJourneys.add(j);
+        Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " updated.");
+    }
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.journeylistlayout, null);
-            holder = new ViewHolder();
-            holder.destination = (TextView) convertView.findViewById(R.id.destination);
-            holder.sName = (TextView) convertView.findViewById(R.id.sname);
-            holder.time = (TextView) convertView.findViewById(R.id.rttime);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
+    public void removePastDepartures(){
+        VasttrafikJourney journeyInList;
+        Vector<Integer> indexToRemove = new Vector();
+
+        for(int i=0;i<mJourneys.size();i++){
+            if(mJourneys.get(i).minutesUntilDeparture()<0){
+                Log.d("VASTTRAFIK", "Will remove journey with id: " + mJourneys.get(i).getJourneyId());
+                indexToRemove.add(i);
+            }
         }
 
-        VasttrafikJourney j = mJourneys.get(position);
-
-        holder.time.setText(j.getTime());
-        holder.sName.setText(j.getSname());
-        holder.destination.setText(j.getDirection());
-
-        return convertView;
-    }*/
+        Iterator<Integer> it = indexToRemove.iterator();
+        while(it.hasNext()){
+            Log.d("VASTTRAFIK", "Journey removed");
+            mJourneys.removeItemAt(it.next());
+        }
+    }
 
     @Override
     public JourneyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

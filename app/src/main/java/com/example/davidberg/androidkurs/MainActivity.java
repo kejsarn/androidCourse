@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -44,12 +45,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
     private PHHueSDK phHueSDK;
     private VasttrafikAuthenticatorInfo vAuth;
-    private List<VasttrafikJourney> journeys;
+
     //private JourneyAdapter jAdapter;
     Settings set;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private JourneyAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        journeys = new ArrayList<VasttrafikJourney>();
         //ListView lv = (ListView) findViewById(R.id.listView);
         mRecyclerView = (RecyclerView) findViewById(R.id.myRecyclerView);
         mRecyclerView.setHasFixedSize(true);
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         //jAdapter = new JourneyAdapter(lv.getContext(), journeys);
-        mAdapter = new JourneyAdapter(journeys);
+        mAdapter = new JourneyAdapter();
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -344,7 +344,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                             Log.e("VASTTRAFIK", "onProgressUpdate input argument length error");
                             return;
                         }
-                        ListIterator<VasttrafikJourney> it = journeys.listIterator();
+                        mAdapter.addItem(journey[0]);
+                        /*ListIterator<VasttrafikJourney> it = journeys.listIterator();
                         VasttrafikJourney inputJourney = journey[0];
                         VasttrafikJourney JourneyInList;
                         while(it.hasNext()){
@@ -365,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                             Log.d("VASTTRAFIK", "Journey with id: " + inputJourney.getJourneyId() + " not in List, added item");
                         }
                         Log.d("VASTTRAFIK","Departure; Name: "+inputJourney.getName()+", Direction: "+inputJourney.getDirection()+", DateTime: "+inputJourney.getDate()+" "+inputJourney.getTime()+" Minutes til departure: "+inputJourney.minutesUntilDeparture().toString());
-
+*/
                     }
 
                 }.execute("9021014003980000", vAuth.getAccessToken());
@@ -386,19 +387,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     }
 
     private void updateJourneyList(){
-        ListIterator<VasttrafikJourney> it = journeys.listIterator();
-        VasttrafikJourney journeyInList;
-        while(it.hasNext()) {
-            journeyInList = it.next();
-            if(journeyInList.minutesUntilDeparture()<0){
-                Log.d("VASTTRAFIK", "Journey with id: "+journeyInList.getJourneyId()+" removed since minutesUntilDep<0");
-                //TODO Fix bug somewhere around here
-                int i = journeys.indexOf(journeyInList);
-                journeys.remove(i);
-                mAdapter.notifyItemRemoved(i);
-            }
-        }
-
+        mAdapter.removePastDepartures();
     }
 
 
