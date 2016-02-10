@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,77 +10,115 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.davidberg.androidkurs.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#FF0000"
-        android:text="Hejsan världen!"
-        android:id="@+id/textView" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <AnalogClock
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/analogClock"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:clickable="true"
-        android:longClickable="true" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spara"
+            android:id="@+id/saveButton"
+            android:onClick="sparaKnappKlickad"
+            android:layout_below="@+id/hueButton"
+            android:layout_centerHorizontal="true" />
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="En switch"
-        android:id="@+id/switch1"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true"
-        android:onClick="SwitchClicked"/>
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ladda"
+            android:id="@+id/loadButton"
+            android:onClick="laddaKnappKlickad"
+            android:layout_below="@+id/saveButton"
+            android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ny Aktivitet"
-        android:id="@+id/button"
-        android:layout_below="@+id/switch1"
-        android:layout_alignEnd="@+id/switch1"
-        android:layout_marginTop="39dp"
-        android:onClick="NyAktivitetKlickad" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hue"
+            android:id="@+id/hueButton"
+            android:onClick="hueButtonClicked"
+            android:layout_below="@+id/connectTramButton"
+            android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Broadcast Received:"
-        android:id="@+id/textView3"
-        android:layout_below="@+id/analogClock"
-        android:layout_centerHorizontal="true" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect Bridge"
+            android:id="@+id/bridgeButton"
+            android:onClick="onLongClick"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Spara"
-        android:id="@+id/button4"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentStart="true"
-        android:onClick="sparaKnappKlickad" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Departures"
+            android:id="@+id/getDepartureButton"
+            android:onClick="getDepClicked" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ladda"
-        android:id="@+id/button5"
-        android:layout_below="@+id/button4"
-        android:layout_alignParentStart="true"
-        android:onClick="laddaKnappKlickad" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText2"
-        android:layout_alignBottom="@+id/button5"
-        android:layout_below="@+id/textView3"
-        android:layout_alignParentEnd="true" />
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Resa Auth"
+                android:id="@+id/connectTramButton"
+                android:onClick="onConnectClick"
+                android:layout_below="@+id/bridgeButton"
+                android:layout_centerHorizontal="true"
+                android:enabled="true" />
 
-</RelativeLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Token"
+                    android:id="@+id/textViewToken" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Expires"
+                    android:id="@+id/textViewExpires"
+                    android:gravity="right" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/myRecyclerView"
+                android:scrollIndicators="right"
+                android:dividerHeight="0dp"
+                android:divider="@null"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
