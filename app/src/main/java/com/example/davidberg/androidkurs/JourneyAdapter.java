@@ -47,22 +47,32 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
         Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " updated.");
     }
 
+    public void addAll(List<VasttrafikJourney> l){
+        mJourneys.addAll(l);
+        Log.d("VASTTRAFIK", "All Journeys added/updated.");
+    }
+
     public void removePastDepartures(){
         VasttrafikJourney journeyInList;
-        Vector<Integer> indexToRemove = new Vector();
+        Vector<VasttrafikJourney> objectsToRemove = new Vector();
+
 
         for(int i=0;i<mJourneys.size();i++){
             if(mJourneys.get(i).minutesUntilDeparture()<0){
                 Log.d("VASTTRAFIK", "Will remove journey with id: " + mJourneys.get(i).getJourneyId());
-                indexToRemove.add(i);
+                //mJourneys.remove(mJourneys.get(i));
+               objectsToRemove.add(mJourneys.get(i));
             }
         }
 
-        Iterator<Integer> it = indexToRemove.iterator();
+        mJourneys.beginBatchedUpdates();
+        Iterator<VasttrafikJourney> it = objectsToRemove.iterator();
         while(it.hasNext()){
             Log.d("VASTTRAFIK", "Journey removed");
-            mJourneys.removeItemAt(it.next());
+            mJourneys.remove(it.next());
         }
+        mJourneys.endBatchedUpdates();
+
     }
 
     @Override

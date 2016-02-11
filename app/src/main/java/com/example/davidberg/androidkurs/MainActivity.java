@@ -333,40 +333,17 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                 new VasttrafikDepartureBoard() {
                     @Override
                     protected void onPostExecute(List<VasttrafikJourney> journeys) {
-                        //TODO Could remove the parameter since we don't use it
-                        updateJourneyList();
+                        updateJourneyList(journeys);
                     }
 
                     @Override
                     protected void onProgressUpdate(VasttrafikJourney... journey) {
-                        Log.d("VASTTRAFIK", "onProgressUpdate()");
+/*                        Log.d("VASTTRAFIK", "onProgressUpdate()");
                         if(journey.length>1){
                             Log.e("VASTTRAFIK", "onProgressUpdate input argument length error");
                             return;
                         }
-                        mAdapter.addItem(journey[0]);
-                        /*ListIterator<VasttrafikJourney> it = journeys.listIterator();
-                        VasttrafikJourney inputJourney = journey[0];
-                        VasttrafikJourney JourneyInList;
-                        while(it.hasNext()){
-                            JourneyInList = it.next();
-                            if(JourneyInList.getJourneyId().equals(inputJourney.getJourneyId())){
-                                JourneyInList.setDirection(inputJourney.getDirection());
-                                JourneyInList.setSname(inputJourney.getSname());
-                                JourneyInList.setTime(inputJourney.getTime());
-                                JourneyInList.setName(inputJourney.getName());
-                                mAdapter.notifyItemChanged(journeys.indexOf(JourneyInList));
-                                Log.d("VASTTRAFIK", "Journey with id: "+inputJourney.getJourneyId()+" already in List, updated item");
-                                break;
-                            }
-                        }
-                        if(journeys.contains(inputJourney)==false){
-                            journeys.add(inputJourney);
-                            mAdapter.notifyItemInserted(journeys.size());
-                            Log.d("VASTTRAFIK", "Journey with id: " + inputJourney.getJourneyId() + " not in List, added item");
-                        }
-                        Log.d("VASTTRAFIK","Departure; Name: "+inputJourney.getName()+", Direction: "+inputJourney.getDirection()+", DateTime: "+inputJourney.getDate()+" "+inputJourney.getTime()+" Minutes til departure: "+inputJourney.minutesUntilDeparture().toString());
-*/
+                        mAdapter.addItem(journey[0]);*/
                     }
 
                 }.execute("9021014003980000", vAuth.getAccessToken());
@@ -386,7 +363,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         this.vAuth = vAuth;
     }
 
-    private void updateJourneyList(){
+    private void updateJourneyList(List<VasttrafikJourney> journeys){
+        mAdapter.addAll(journeys);
         mAdapter.removePastDepartures();
     }
 
