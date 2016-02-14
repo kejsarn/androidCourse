@@ -50,7 +50,7 @@ public class VasttrafikDepartureBoard extends AsyncTask<String,VasttrafikJourney
         URL url;
         try{
             // Korsvägen = 9021014003980000
-            url = new URL(URL_DEPARTURE_BOARD+"?id="+stopId+"&format=json");
+            url = new URL(URL_DEPARTURE_BOARD+"?id="+stopId+"&format=json&maxDeparturesPerLine=1&timeSpan=15");
             //url = new URL("https://api.vasttrafik.se/bin/rest.exe/v2/departureBoard?date=2016-02-07&direction=9021014007171000&id=9021014003980000&time=14:55");
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestProperty("Accept-Encoding", "gzip,deflate");
@@ -83,15 +83,17 @@ public class VasttrafikDepartureBoard extends AsyncTask<String,VasttrafikJourney
                 {
                     try {
                         JSONObject departure = departures.getJSONObject(i);
-                        VasttrafikJourney v = new VasttrafikJourney();
-                        v.setName(departure.getString("name"));
-                        v.setSname(departure.getString("sname"));
-                        v.setDirection(departure.getString("direction"));
-                        v.setTime(departure.getString("rtTime"));
-                        v.setDate(departure.getString("rtDate"));
-                        v.setJourneyId(departure.getString("journeyid"));
-                        retList.add(v);
-                        publishProgress(v);
+                        if(departure.has("rtTime") && departure.has("rtDate")) {
+                            VasttrafikJourney v = new VasttrafikJourney();
+                            v.setName(departure.getString("name"));
+                            v.setSname(departure.getString("sname"));
+                            v.setDirection(departure.getString("direction"));
+                            v.setTime(departure.getString("rtTime"));
+                            v.setDate(departure.getString("rtDate"));
+                            v.setJourneyId(departure.getString("journeyid"));
+                            retList.add(v);
+                            publishProgress(v);
+                        }
                         //Log.d("VASTTRAFIK","Departure; Name: "+v.getName()+", Direction: "+v.getDirection()+", DateTime: "+v.getDate()+" "+v.getTime()+" Minutes til departure: "+v.minutesUntilDeparture().toString());
                     } catch (JSONException e) {
                         Log.e("VASTTRAFIK", "Departure parsing error");

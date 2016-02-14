@@ -119,13 +119,13 @@ public class VasttrafikJourney {
         if (other == this) return true;
         if (!(other instanceof VasttrafikJourney)) return false;
         VasttrafikJourney otherMyClass = (VasttrafikJourney) other;
-        if (otherMyClass.isTypeDivider() || this.isTypeDivider()) return false;
         if (otherMyClass.getJourneyId().equals(this.getJourneyId()) &&
                 otherMyClass.getTime().equals(this.getTime()) &&
                 otherMyClass.getDate().equals(this.getDate()) &&
                 otherMyClass.getDirection().equals(this.getDirection()) &&
                 otherMyClass.getName().equals(this.getName()) &&
-                otherMyClass.getSname().equals(this.getSname())) return true;
+                otherMyClass.getSname().equals(this.getSname()) &&
+                otherMyClass.isTypeDivider()==this.isTypeDivider()) return true;
         return false;
     }
 

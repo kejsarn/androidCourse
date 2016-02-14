@@ -19,6 +19,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
@@ -38,7 +43,12 @@
             android:onClick="laddaKnappKlickad"
             android:layout_below="@+id/saveButton"
             android:layout_centerHorizontal="true" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
@@ -59,49 +69,59 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get Departures"
-            android:id="@+id/getDepartureButton"
-            android:onClick="getDepClicked" />
+
+    </LinearLayout>
+
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <Button
-                style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resa Auth"
-                android:id="@+id/connectTramButton"
-                android:onClick="onConnectClick"
-                android:layout_below="@+id/bridgeButton"
-                android:layout_centerHorizontal="true"
-                android:enabled="true" />
+                android:text="Get Departures"
+                android:id="@+id/getDepartureButton"
+                android:onClick="getDepClicked" />
 
             <LinearLayout
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
+                <Button
+                    style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Token"
-                    android:id="@+id/textViewToken" />
+                    android:text="Resa Auth"
+                    android:id="@+id/connectTramButton"
+                    android:onClick="onConnectClick"
+                    android:enabled="true" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Expires"
-                    android:id="@+id/textViewExpires"
-                    android:gravity="right" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="Token"
+                        android:id="@+id/textViewToken" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="Expires"
+                        android:id="@+id/textViewExpires"
+                        android:gravity="right" />
+                </LinearLayout>
+
             </LinearLayout>
+
 
         </LinearLayout>
 

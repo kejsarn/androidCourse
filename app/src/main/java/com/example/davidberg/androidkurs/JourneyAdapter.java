@@ -1,6 +1,7 @@
 package com.example.davidberg.androidkurs;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.util.SortedListAdapterCallback;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -27,24 +29,57 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
         mJourneys = new SortedList<VasttrafikJourney>(VasttrafikJourney.class, new SortedListAdapterCallback<VasttrafikJourney>(this) {
             @Override
             public int compare(VasttrafikJourney j0, VasttrafikJourney j1) {
-                return (int)(j0.minutesUntilDeparture() - j1.minutesUntilDeparture());
+                long comp = (j0.minutesUntilDeparture() - j1.minutesUntilDeparture());
+                Log.d("VTJOURNEYICOMP","Items compared, "+comp+": "+j0.getJourneyId()+" "+j1.getJourneyId());
+                return (int)comp;
             }
 
             @Override
             public boolean areItemsTheSame(VasttrafikJourney j0, VasttrafikJourney j1){
-                return j0.getJourneyId().equals(j1.getJourneyId());
+                boolean retVal = j0.getJourneyId().equals(j1.getJourneyId());
+                if(!retVal){
+                    Log.d("VTJOURNEYIDITEMSSAME","Items not the same: "+j0.getJourneyId()+" "+j1.getJourneyId());
+                }else{
+                    Log.d("VTJOURNEYIDITEMSSAME","Items are the same: "+j0.getJourneyId()+" "+j1.getJourneyId());
+                }
+                return retVal;
             }
 
             @Override
             public boolean areContentsTheSame(VasttrafikJourney oldItem, VasttrafikJourney newItem){
+                boolean retVal = oldItem.equals(newItem);
+                if (!retVal) {
+                    Log.d("VTJOURNEYIDCONTENTSSAME", "Item content not the same: "+oldItem.getJourneyId()+" "+newItem.getJourneyId());
+                }
                 return oldItem.equals(newItem);
+            }
+            @Override
+            public void onInserted (int position, int count){
+                Log.d("VTJOURNEYIDINSERTED", String.valueOf(count).toString()+"iItem(s) inserted at: "+String.valueOf(position));
+                for(int i=position;i<position+count;i++) {
+                    Log.d("VTJOURNEYIDINSERTED", "  - " + mJourneys.get(i).getJourneyId());
+                }
             }
         });
     }
 
-    public void addItem(VasttrafikJourney j){
-        mJourneys.add(j);
-        Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " updated.");
+    public void addItem(@NonNull VasttrafikJourney j){
+        int index = -1;
+        for (int i = 0; i < mJourneys.size(); i++) {
+            if (mJourneys.get(i).getJourneyId().equals(j.getJourneyId())) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            mJourneys.add(j); // add it if it doesnt exist
+            Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " added.");
+        } else {
+            mJourneys.updateItemAt(index, j); // update it if it exists
+            Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " updated.");
+        }
+
     }
 
     public void addDivider(String text, Long minutesUntilDep){
@@ -57,7 +92,12 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
     }
 
     public void addAll(List<VasttrafikJourney> l){
-        mJourneys.addAll(l);
+        Iterator<VasttrafikJourney> it = l.iterator();
+        while(it.hasNext()){
+          addItem(it.next());
+        }
+
+        //notifyDataSetChanged();
         Log.d("VASTTRAFIK", "All Journeys added/updated.");
     }
 
@@ -68,7 +108,7 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
 
         for(int i=0;i<mJourneys.size();i++){
             if(mJourneys.get(i).minutesUntilDeparture()<0){
-                Log.d("VASTTRAFIK", "Will remove journey with id: " + mJourneys.get(i).getJourneyId());
+                Log.d("VASTTRAFIK", "Will remove j: " + mJourneys.get(i).getJourneyId()+" "+mJourneys.get(i).minutesUntilDeparture()+" "+mJourneys.get(i).getSname());
                 //mJourneys.remove(mJourneys.get(i));
                objectsToRemove.add(mJourneys.get(i));
             }
@@ -81,7 +121,7 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
             mJourneys.remove(it.next());
         }
         mJourneys.endBatchedUpdates();
-
+        notifyDataSetChanged();
     }
 
     @Override
@@ -103,7 +143,7 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
         if(getItemViewType(position)==0){
             ((JourneyViewHolder)holder).time.setText(j.getTime());
             ((JourneyViewHolder)holder).sName.setText(j.getSname());
-            ((JourneyViewHolder)holder).destination.setText(j.getDirection());
+            ((JourneyViewHolder)holder).destination.setText(j.getDirection()+" "+j.getJourneyId());
         }else{
             ((DividerViewHolder)holder).text.setText(j.getDividerTime().toString()+""+j.getDividerText());
         }
