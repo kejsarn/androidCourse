@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         //jAdapter = new JourneyAdapter(lv.getContext(), journeys);
         mAdapter = new JourneyAdapter();
         mAdapter.setHasStableIds(true);
+        mAdapter.addDivider("minuter till avgång", 4L);
+        mAdapter.addDivider("minuter till avgång dags att gå", 8L);
         mRecyclerView.setAdapter(mAdapter);
 
         phHueSDK = PHHueSDK.getInstance();

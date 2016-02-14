@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dividerText"
+        android:text="4 minuter till avgång"
+        android:padding="4dp"
+        android:textSize="8dp"
+        android:textStyle="italic"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:background="#e89191" />
+
+</LinearLayout>

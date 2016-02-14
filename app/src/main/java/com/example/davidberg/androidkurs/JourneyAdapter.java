@@ -47,6 +47,15 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
         Log.d("VASTTRAFIK", "Journey with id: " + j.getJourneyId() + " updated.");
     }
 
+    public void addDivider(String text, Long minutesUntilDep){
+        VasttrafikJourney divider = new VasttrafikJourney();
+        divider.setTypeDivider(true);
+        divider.setName(text);
+        divider.setDividerTime(minutesUntilDep);
+        divider.setJourneyId(divider.getDividerTime().toString());
+        mJourneys.add(divider);
+    }
+
     public void addAll(List<VasttrafikJourney> l){
         mJourneys.addAll(l);
         Log.d("VASTTRAFIK", "All Journeys added/updated.");
@@ -77,20 +86,37 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
 
     @Override
     public JourneyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.journeylistlayout, parent, false);
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        if(viewType==0) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.journeylistlayout, parent, false);
+            JourneyViewHolder vh = new JourneyViewHolder(v);
+            return vh;
+        }else{
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.dividerlistlayout, parent, false);
+            DividerViewHolder vh = new DividerViewHolder(v);
+            return vh;
+        }
     }
 
     @Override
     public void onBindViewHolder(JourneyAdapter.ViewHolder holder, int position) {
         VasttrafikJourney j = mJourneys.get(position);
-
-        holder.time.setText(j.getTime());
-        holder.sName.setText(j.getSname());
-        holder.destination.setText(j.getDirection());
+        if(getItemViewType(position)==0){
+            ((JourneyViewHolder)holder).time.setText(j.getTime());
+            ((JourneyViewHolder)holder).sName.setText(j.getSname());
+            ((JourneyViewHolder)holder).destination.setText(j.getDirection());
+        }else{
+            ((DividerViewHolder)holder).text.setText(j.getDividerTime().toString()+""+j.getDividerText());
+        }
     }
 
+    @Override
+    public int getItemViewType(int position){
+        if(!mJourneys.get(position).isTypeDivider()){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
     @Override
     public long getItemId(int position){
         return Long.parseLong(mJourneys.get(position).getJourneyId());
@@ -102,16 +128,31 @@ public class JourneyAdapter extends RecyclerView.Adapter<JourneyAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
+
+        public ViewHolder(View v){
+            super(v);
+        }
+
+    }
+    public static class JourneyViewHolder extends ViewHolder{
         public TextView time;
         public TextView sName;
         public TextView destination;
 
-        public ViewHolder(View v){
-            super(v);
-            time = (TextView) v.findViewById(R.id.rttime);
-            sName = (TextView) v.findViewById(R.id.sname);
-            destination = (TextView) v.findViewById(R.id.destination);
-        }
+       public JourneyViewHolder(View v){
+           super(v);
+           time = (TextView) v.findViewById(R.id.rttime);
+           sName = (TextView) v.findViewById(R.id.sname);
+           destination = (TextView) v.findViewById(R.id.destination);
+       }
+    }
 
+    public static class DividerViewHolder extends ViewHolder{
+        public TextView text;
+
+        public DividerViewHolder(View v) {
+            super(v);
+            text = (TextView) v.findViewById(R.id.dividerText);
+        }
     }
 }

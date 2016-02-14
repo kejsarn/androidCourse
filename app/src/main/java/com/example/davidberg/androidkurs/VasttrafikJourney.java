@@ -18,6 +18,33 @@ public class VasttrafikJourney {
     private String direction;
     private String time;
     private String date;
+    private boolean typeDivider = false;
+    private String dividerText;
+    private Long dividerTime;
+
+    public Long getDividerTime() {
+        return dividerTime;
+    }
+
+    public void setDividerTime(Long dividerTime) {
+        this.dividerTime = dividerTime;
+    }
+
+    public String getDividerText() {
+        return dividerText;
+    }
+
+    public void setDividerText(String dividerText) {
+        this.dividerText = dividerText;
+    }
+
+    public boolean isTypeDivider() {
+        return typeDivider;
+    }
+
+    public void setTypeDivider(boolean typeDivider) {
+        this.typeDivider = typeDivider;
+    }
 
     public String getJourneyId() {
         return journeyId;
@@ -68,18 +95,22 @@ public class VasttrafikJourney {
     }
 
     public Long minutesUntilDeparture(){
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        long timeDiffMilliSec = 0;
-        try {
-            Date date = (Date) formatter.parse(getDate()+" "+getTime());
-            timeDiffMilliSec = date.getTime() - Calendar.getInstance().getTimeInMillis();
-        }catch (ParseException e){
-            Log.e("VASTTRAFIK", "Error parsing rtTime! String to parse: " + getDate()+" "+getTime());
-            e.printStackTrace();
-        }catch (IllegalArgumentException e){
-            Log.e("VASTTRAFIK", "Error converting Calendar to milliseconds");
+        if(isTypeDivider()){
+            return getDividerTime();
+        }else {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            long timeDiffMilliSec = 0;
+            try {
+                Date date = (Date) formatter.parse(getDate() + " " + getTime());
+                timeDiffMilliSec = date.getTime() - Calendar.getInstance().getTimeInMillis();
+            } catch (ParseException e) {
+                Log.e("VASTTRAFIK", "Error parsing rtTime! String to parse: " + getDate() + " " + getTime());
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                Log.e("VASTTRAFIK", "Error converting Calendar to milliseconds");
+            }
+            return timeDiffMilliSec / (1000 * 60);
         }
-        return timeDiffMilliSec/(1000*60);
     }
 
     @Override
@@ -88,6 +119,7 @@ public class VasttrafikJourney {
         if (other == this) return true;
         if (!(other instanceof VasttrafikJourney)) return false;
         VasttrafikJourney otherMyClass = (VasttrafikJourney) other;
+        if (otherMyClass.isTypeDivider() || this.isTypeDivider()) return false;
         if (otherMyClass.getJourneyId().equals(this.getJourneyId()) &&
                 otherMyClass.getTime().equals(this.getTime()) &&
                 otherMyClass.getDate().equals(this.getDate()) &&
